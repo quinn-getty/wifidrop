@@ -2,23 +2,32 @@ package main
 
 import (
 	"log"
-	"net/url"
+	"net/http"
+	"os"
+	"os/signal"
 
-	"github.com/zserge/lorca"
+	"github.com/gin-gonic/gin"
+	"github.com/quinn-getty/airdrop-go/chrome"
 )
 
 func main() {
-	// Create UI with basic HTML passed via data URI
-	ui, err := lorca.New("data:text/html,"+url.PathEscape(`
-	<html>
-		<head><title>Hello</title></head>
-		<body><h1>Hello, world!</h1></body>
-	</html>
-	`), "", 480, 320, "--remote-allow-origins=*")
-	if err != nil {
-		log.Fatal(err)
+	go func() {
+		gin.SetMode(gin.ReleaseMode)
+		r := gin.Default()
+
+		r.GET("/", func(c *gin.Context) {
+			c.String(http.StatusOK, "<h1>hi</h1>")
+		})
+		r.Run(":8080")
+	}()
+
+	cmd := chrome.Open("http://127.0.0.1:8080")
+	log.Println(cmd)
+
+	chSignal := make(chan os.Signal, 1)
+	select {
+	case <-chSignal:
+		signal.Notify(chSignal, os.Interrupt)
+		cmd.Process.Kill()
 	}
-	defer ui.Close()
-	// Wait until UI window is closed
-	<-ui.Done()
 }
