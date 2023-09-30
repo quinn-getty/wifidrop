@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,7 +33,9 @@ func main() {
 		r := gin.Default()
 
 		staticFiles, _ := fs.Sub(FS, "frontend/dist")
+		r.GET("/uploads/:path", UploadsController)
 		r.POST("/api/v1/texts", TextController)
+		r.GET("/api/v1/addresses", AddressesController)
 		r.StaticFS("/static", http.FS(staticFiles))
 		r.NoRoute(func(ctx *gin.Context) {
 			path := ctx.Request.URL.Path
@@ -65,6 +68,44 @@ func main() {
 	case <-chSignal:
 		cmd.Process.Kill()
 	}
+}
+
+func GetUploadsDir() (string, error) {
+	exe, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	dir := filepath.Dir(exe)
+	uploads := filepath.Join(dir, "uploads")
+	return uploads, nil
+}
+
+func UploadsController(c *gin.Context) {
+	uploadsPath, _ := GetUploadsDir()
+	if path := c.Param("path"); path != "" {
+		target := filepath.Join(uploadsPath, path)
+		c.Header("Content-Description", "File Transfer")
+		c.Header("Content-Transfer-Encoding", "binary")
+		c.Header("Content-Disposition", "attachment; filename="+path)
+		c.File(target)
+	} else {
+		c.Status(http.StatusNotFound)
+	}
+}
+func AddressesController(c *gin.Context) {
+	addresses, _ := net.InterfaceAddrs()
+	var result []string
+	for _, address := range addresses {
+		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				result = append(result, ipnet.IP.String())
+			}
+		}
+
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"addresses": result,
+	})
 }
 
 type TextReq struct {
