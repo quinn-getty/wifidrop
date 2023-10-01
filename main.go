@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/quinn-getty/airdrop-go/chrome"
 	"github.com/quinn-getty/airdrop-go/utils"
+	"github.com/skip2/go-qrcode"
 )
 
 //go:embed frontend/dist/*
@@ -34,6 +35,8 @@ func main() {
 
 		staticFiles, _ := fs.Sub(FS, "frontend/dist")
 		r.GET("/uploads/:path", UploadsController)
+		r.POST("/api/v1/files", FilesController)
+		r.GET("/api/v1/qrcodes", QrcodeController)
 		r.POST("/api/v1/texts", TextController)
 		r.GET("/api/v1/addresses", AddressesController)
 		r.StaticFS("/static", http.FS(staticFiles))
@@ -70,6 +73,39 @@ func main() {
 	}
 }
 
+func FilesController(c *gin.Context) {
+	file, err := c.FormFile("raw")
+	if err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	dir, _ := GetUploadsDir()
+	fullPath := filepath.Join(dir, filepath.Join(dir, filepath.Ext(file.Filename)))
+	if err = c.SaveUploadedFile(file, fullPath); err != nil {
+		log.Fatal(err)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"url": "/" + fullPath,
+	})
+
+}
+
+func QrcodeController(c *gin.Context) {
+	content := c.Query("content")
+	if content == "" {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+	log.Print("content:", content)
+	png, err := qrcode.Encode(content, qrcode.Medium, 256)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	c.Data(http.StatusOK, "image/png", png)
+}
+
 func GetUploadsDir() (string, error) {
 	exe, err := os.Executable()
 	if err != nil {
@@ -77,6 +113,7 @@ func GetUploadsDir() (string, error) {
 	}
 	dir := filepath.Dir(exe)
 	uploads := filepath.Join(dir, "uploads")
+	log.Print("uploads----------:", uploads)
 	return uploads, nil
 }
 

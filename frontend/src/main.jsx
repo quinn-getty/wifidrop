@@ -39,7 +39,7 @@ const Main = () => {
       c.onMessage(data => {
         const { url, type } = data
         if (data.clientId !== clientId) {
-          const content = (addr) => addr && `http://${addr}:27149/static/downloads?type=${type}&url=${encodeURIComponent(`http://${addr}:27149${url}`)}`
+          const content = (addr) => addr && `http://${addr}:${location.port}/static/downloads?type=${type}&url=${encodeURIComponent(`http://${addr}:${location.port}${url}`)}`
           if (type === 'text') {
             showUploadTextSuccessDialog({ context, content });
           } else {
