@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 
-	"github.com/quinn-getty/airdrop-go/chrome"
 	"github.com/quinn-getty/airdrop-go/server"
 	"github.com/quinn-getty/airdrop-go/utils"
 )
@@ -13,12 +11,12 @@ import (
 func main() {
 	port, _ := utils.GetFreePort()
 	go server.Run(port)
-	cmd := chrome.Open(fmt.Sprintf("http://127.0.0.1:%d/static", port))
+	// cmd := chrome.Open(fmt.Sprintf("http://127.0.0.1:%d/static", port))
 	chSignal := listenToInterpt()
 
 	select {
 	case <-chSignal:
-		cmd.Process.Kill()
+		// cmd.Process.Kill()
 	}
 }
 

@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -23,24 +22,16 @@ func TextController(c *gin.Context) {
 		return
 	}
 
-	exe, err := os.Executable()
+	uploadPath, err := GetUploadsDir()
 	if err != nil {
 		log.Fatal(err)
 	}
-	dir := filepath.Dir(exe)
+
+	filename := uuid.New().String() + ".txt"
+
+	err = os.WriteFile(filepath.Join(uploadPath, filename), []byte(req.Raw), 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
-	filename := uuid.New().String()
-	uploads := filepath.Join(dir, "uploads")
-	err = os.MkdirAll(uploads, os.ModePerm)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fullpath := path.Join("uploads", filename+".txt")
-	err = os.WriteFile(filepath.Join(dir, fullpath), []byte(req.Raw), 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	c.JSON(http.StatusOK, gin.H{"url": "/" + fullpath})
+	c.JSON(http.StatusOK, gin.H{"url": "/uploads/" + filename})
 }

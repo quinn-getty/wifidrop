@@ -9,6 +9,7 @@ import (
 
 func UploadsController(c *gin.Context) {
 	uploadsPath, _ := GetUploadsDir()
+
 	if path := c.Param("path"); path != "" {
 		target := filepath.Join(uploadsPath, path)
 		c.Header("Content-Description", "File Transfer")

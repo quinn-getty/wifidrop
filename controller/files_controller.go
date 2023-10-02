@@ -6,22 +6,25 @@ import (
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func FilesController(c *gin.Context) {
 	file, err := c.FormFile("raw")
+	log.Print("Filename", file.Filename)
 	if err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
+	filename := uuid.New().String() + file.Filename
 
-	dir, _ := GetUploadsDir()
-	fullPath := filepath.Join(dir, filepath.Join(dir, filepath.Ext(file.Filename)))
-	if err = c.SaveUploadedFile(file, fullPath); err != nil {
+	uploadPath, _ := GetUploadsDir()
+
+	if err = c.SaveUploadedFile(file, filepath.Join(uploadPath, filename)); err != nil {
 		log.Fatal(err)
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"url": "/" + fullPath,
+		"url": "/uploads/" + filename,
 	})
 
 }
