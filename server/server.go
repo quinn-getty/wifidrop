@@ -43,5 +43,6 @@ func Run(port int) {
 			ctx.Redirect(http.StatusFound, "/index.html")
 		}
 	})
+	log.Println("开发服务: ", fmt.Sprintf("http://127.0.0.1:%d/static", port))
 	r.Run(fmt.Sprintf(":%d", port))
 }
