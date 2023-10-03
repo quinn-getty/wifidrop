@@ -13,7 +13,7 @@ import (
 	"github.com/quinn-getty/airdrop-go/server/ws"
 )
 
-//go:embed frontend/dist/*
+//go:embed dist/*
 var FS embed.FS
 
 func Run(port int) {
@@ -22,7 +22,7 @@ func Run(port int) {
 	hub := ws.NewHub()
 	go hub.Run()
 
-	staticFiles, _ := fs.Sub(FS, "frontend/dist")
+	staticFiles, _ := fs.Sub(FS, "dist")
 	r.GET("/uploads/:path", controller.UploadsController)
 	r.POST("/api/v1/files", controller.FilesController)
 	r.GET("/api/v1/qrcodes", controller.QrcodeController)
