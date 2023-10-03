@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/quinn-getty/airdrop-go/controller"
+	"github.com/quinn-getty/airdrop-go/controller_v1"
 	"github.com/quinn-getty/airdrop-go/server/ws"
 )
 
@@ -24,23 +24,29 @@ func MiddleWare() gin.HandlerFunc {
 	}
 }
 
+func initApiV1(r *gin.RouterGroup, hub *ws.Hub) {
+	r.GET("/api/v1/uploads/:path", controller_v1.UploadsController)
+	r.POST("/api/v1/files", controller_v1.FilesController)
+	r.GET("/api/v1/qrcodes", controller_v1.QrcodeController)
+	r.POST("/api/v1/texts", controller_v1.TextController)
+	r.GET("/api/v1/addresses", controller_v1.AddressesController)
+	r.GET("/api/v1/ws", func(ctx *gin.Context) {
+		ws.HttpController(ctx, hub)
+	})
+}
+
 func Run(port int) {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	hub := ws.NewHub()
 	go hub.Run()
-
 	staticFiles, _ := fs.Sub(FS, "dist")
 
 	r.Use(MiddleWare())
-	r.GET("/api/v1/uploads/:path", controller.UploadsController)
-	r.POST("/api/v1/files", controller.FilesController)
-	r.GET("/api/v1/qrcodes", controller.QrcodeController)
-	r.POST("/api/v1/texts", controller.TextController)
-	r.GET("/api/v1/addresses", controller.AddressesController)
-	r.GET("/api/v1/ws", func(ctx *gin.Context) {
-		ws.HttpController(ctx, hub)
-	})
+
+	apiV1 := r.Group("/api/v1")
+	initApiV1(apiV1, hub)
+
 	r.StaticFS("/static", http.FS(staticFiles))
 	r.NoRoute(func(ctx *gin.Context) {
 		path := ctx.Request.URL.Path

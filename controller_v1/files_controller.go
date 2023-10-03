@@ -1,4 +1,4 @@
-package controller
+package controller_v1
 
 import (
 	"log"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/quinn-getty/airdrop-go/utils"
 )
 
 func FilesController(c *gin.Context) {
@@ -18,7 +19,7 @@ func FilesController(c *gin.Context) {
 	}
 	filename := uuid.New().String() + file.Filename
 
-	uploadPath, _ := GetUploadsDir()
+	uploadPath, _ := utils.GetUploadsDir()
 
 	if err = c.SaveUploadedFile(file, filepath.Join(uploadPath, filename)); err != nil {
 		log.Fatal(err)

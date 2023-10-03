@@ -1,4 +1,4 @@
-package controller
+package controller_v1
 
 import (
 	"log"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/quinn-getty/airdrop-go/utils"
 )
 
 type TextReq struct {
@@ -22,7 +23,7 @@ func TextController(c *gin.Context) {
 		return
 	}
 
-	uploadPath, err := GetUploadsDir()
+	uploadPath, err := utils.GetUploadsDir()
 	if err != nil {
 		log.Fatal(err)
 	}

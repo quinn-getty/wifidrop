@@ -1,14 +1,15 @@
-package controller
+package controller_v1
 
 import (
 	"net/http"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
+	"github.com/quinn-getty/airdrop-go/utils"
 )
 
 func UploadsController(c *gin.Context) {
-	uploadsPath, _ := GetUploadsDir()
+	uploadsPath, _ := utils.GetUploadsDir()
 
 	if path := c.Param("path"); path != "" {
 		target := filepath.Join(uploadsPath, path)
