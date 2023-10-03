@@ -38,7 +38,7 @@ require (
 	github.com/google/uuid v1.3.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.8.4 // indirect
-	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/net v0.14.0
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
