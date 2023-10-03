@@ -25,7 +25,7 @@ func Uploads(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
-	// 写库
+	// 写库 发消息
 
 	c.JSON(http.StatusOK, gin.H{
 		"name": filename,

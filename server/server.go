@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/quinn-getty/airdrop-go/controller_v1"
+	"github.com/quinn-getty/airdrop-go/controller_v2"
 	"github.com/quinn-getty/airdrop-go/server/ws"
 )
 
@@ -25,14 +26,18 @@ func MiddleWare() gin.HandlerFunc {
 }
 
 func initApiV1(r *gin.RouterGroup, hub *ws.Hub) {
-	r.GET("/api/v1/uploads/:path", controller_v1.UploadsController)
-	r.POST("/api/v1/files", controller_v1.FilesController)
-	r.GET("/api/v1/qrcodes", controller_v1.QrcodeController)
-	r.POST("/api/v1/texts", controller_v1.TextController)
-	r.GET("/api/v1/addresses", controller_v1.AddressesController)
-	r.GET("/api/v1/ws", func(ctx *gin.Context) {
+	r.GET("/uploads/:path", controller_v1.UploadsController)
+	r.POST("/files", controller_v1.FilesController)
+	r.GET("/qrcodes", controller_v1.QrcodeController)
+	r.POST("/texts", controller_v1.TextController)
+	r.GET("/addresses", controller_v1.AddressesController)
+	r.GET("/ws", func(ctx *gin.Context) {
 		ws.HttpController(ctx, hub)
 	})
+}
+func initApiV2(r *gin.RouterGroup, hub *ws.Hub) {
+	r.POST("/send", controller_v2.Send)
+	r.GET("/history", controller_v2.History)
 }
 
 func Run(port int) {
@@ -44,8 +49,8 @@ func Run(port int) {
 
 	r.Use(MiddleWare())
 
-	apiV1 := r.Group("/api/v1")
-	initApiV1(apiV1, hub)
+	initApiV1(r.Group("/api/v1"), hub)
+	initApiV2(r.Group("/api/v2"), hub)
 
 	r.StaticFS("/static", http.FS(staticFiles))
 	r.NoRoute(func(ctx *gin.Context) {
