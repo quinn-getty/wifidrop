@@ -1,14 +1,19 @@
-package chrome
+package lorca
 
 import (
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 )
 
-// func chromePath
-func locateChrome() string {
+// ChromeExecutable returns a string which points to the preferred Chrome
+// executable file.
+var ChromeExecutable = LocateChrome
+
+// LocateChrome returns a path to the Chrome binary, or an empty string if
+// Chrome installation is not found.
+func LocateChrome() string {
 
 	// If env variable "LORCACHROME" specified and it exists
 	if path, ok := os.LookupEnv("LORCACHROME"); ok {
@@ -24,6 +29,7 @@ func locateChrome() string {
 			"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
 			"/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
 			"/Applications/Chromium.app/Contents/MacOS/Chromium",
+			"/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
 			"/usr/bin/google-chrome-stable",
 			"/usr/bin/google-chrome",
 			"/usr/bin/chromium",
@@ -38,6 +44,7 @@ func locateChrome() string {
 			os.Getenv("ProgramFiles") + "/Chromium/Application/chrome.exe",
 			os.Getenv("ProgramFiles(x86)") + "/Chromium/Application/chrome.exe",
 			os.Getenv("ProgramFiles(x86)") + "/Microsoft/Edge/Application/msedge.exe",
+			os.Getenv("ProgramFiles") + "/Microsoft/Edge/Application/msedge.exe",
 		}
 	default:
 		paths = []string{
@@ -58,14 +65,26 @@ func locateChrome() string {
 	return ""
 }
 
-func Open(app string) *exec.Cmd {
-	path := locateChrome()
-	cmd := exec.Command(path, "--app="+app)
-	log.Print("-----", cmd.ProcessState)
-	cmd.Start()
+// PromptDownload asks user if he wants to download and install Chrome, and
+// opens a download web page if the user agrees.
+func PromptDownload() {
+	title := "Chrome not found"
+	text := "No Chrome/Chromium installation was found. Would you like to download and install it now?"
 
-	return cmd
+	// Ask user for confirmation
+	if !messageBox(title, text) {
+		return
+	}
 
+	// Open download page
+	url := "https://www.google.com/chrome/"
+	switch runtime.GOOS {
+	case "linux":
+		exec.Command("xdg-open", url).Run()
+	case "darwin":
+		exec.Command("open", url).Run()
+	case "windows":
+		r := strings.NewReplacer("&", "^&")
+		exec.Command("cmd", "/c", "start", r.Replace(url)).Run()
+	}
 }
-
-// func New(app string)
