@@ -17,6 +17,9 @@ import (
 //go:embed dist/*
 var FS embed.FS
 
+//go:embed .chat/*
+var ChatFS embed.FS
+
 // 定义中间
 func MiddleWare() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -46,6 +49,7 @@ func Run(port int) {
 	hub := ws.NewHub()
 	go hub.Run()
 	staticFiles, _ := fs.Sub(FS, "dist")
+	chatStaticFiles, _ := fs.Sub(ChatFS, ".chat")
 
 	r.Use(MiddleWare())
 
@@ -53,6 +57,7 @@ func Run(port int) {
 	initApiV2(r.Group("/api/v2"), hub)
 
 	r.StaticFS("/static", http.FS(staticFiles))
+	r.StaticFS("/chat", http.FS(chatStaticFiles))
 	r.NoRoute(func(ctx *gin.Context) {
 		path := ctx.Request.URL.Path
 		if strings.HasPrefix(path, "/static/") {
@@ -67,7 +72,8 @@ func Run(port int) {
 			}
 			ctx.DataFromReader(http.StatusOK, stat.Size(), "text/html", reader, nil)
 		} else {
-			ctx.Redirect(http.StatusFound, "/index.html")
+			ctx.Status(http.StatusInternalServerError)
+			// ctx.Redirect(http.StatusFound, "/index.html")
 		}
 	})
 	log.Println("开发服务: ", fmt.Sprintf("http://127.0.0.1:%d/static", port))
