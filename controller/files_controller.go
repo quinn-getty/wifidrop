@@ -24,7 +24,7 @@ func FilesController(c *gin.Context) {
 		log.Fatal(err)
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"url": "/uploads/" + filename,
+		"url": "/api/v1/uploads/" + filename,
 	})
 
 }

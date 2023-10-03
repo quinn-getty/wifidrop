@@ -16,6 +16,14 @@ import (
 //go:embed dist/*
 var FS embed.FS
 
+// 定义中间
+func MiddleWare() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		log.Print("【IP】", c.ClientIP())
+		c.Next()
+	}
+}
+
 func Run(port int) {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
@@ -23,12 +31,14 @@ func Run(port int) {
 	go hub.Run()
 
 	staticFiles, _ := fs.Sub(FS, "dist")
-	r.GET("/uploads/:path", controller.UploadsController)
+
+	r.Use(MiddleWare())
+	r.GET("/api/v1/uploads/:path", controller.UploadsController)
 	r.POST("/api/v1/files", controller.FilesController)
 	r.GET("/api/v1/qrcodes", controller.QrcodeController)
 	r.POST("/api/v1/texts", controller.TextController)
 	r.GET("/api/v1/addresses", controller.AddressesController)
-	r.GET("/ws", func(ctx *gin.Context) {
+	r.GET("/api/v1/ws", func(ctx *gin.Context) {
 		ws.HttpController(ctx, hub)
 	})
 	r.StaticFS("/static", http.FS(staticFiles))

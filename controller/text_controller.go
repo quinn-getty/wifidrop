@@ -33,5 +33,5 @@ func TextController(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	c.JSON(http.StatusOK, gin.H{"url": "/uploads/" + filename})
+	c.JSON(http.StatusOK, gin.H{"url": "/api/v1/uploads/" + filename})
 }
