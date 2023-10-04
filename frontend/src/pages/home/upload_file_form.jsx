@@ -65,6 +65,7 @@ export const UploadFileForm = () => {
     </Form>
   );
 };
+
 const Box = styled.div`
   &.dragging {
     border-color: ${({ theme }) => theme.highlightColor};

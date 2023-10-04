@@ -10,9 +10,7 @@ import (
 )
 
 type SendReq struct {
-	Type     string `json:"type"`
-	Content  string `json:"content"`
-	FileType string `json:"fileType"`
+	Content string `json:"content"`
 }
 
 func Send(c *gin.Context) {
@@ -23,7 +21,7 @@ func Send(c *gin.Context) {
 	}
 
 	if err := file.WhiteHistory(file.HistoryTiem{
-		Type:    req.Type,
+		Type:    "string",
 		Content: req.Content,
 		Time:    time.Now().Unix(),
 		IP:      c.ClientIP(),

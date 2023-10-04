@@ -40,6 +40,8 @@ func initApiV1(r *gin.RouterGroup, hub *ws.Hub) {
 }
 func initApiV2(r *gin.RouterGroup, hub *ws.Hub) {
 	r.POST("/send", controller_v2.Send)
+	r.POST("/upload", controller_v2.Uploads)
+	r.POST("/download", controller_v2.DownLoads)
 	r.GET("/history", controller_v2.History)
 }
 
@@ -76,6 +78,7 @@ func Run(port int) {
 			// ctx.Redirect(http.StatusFound, "/index.html")
 		}
 	})
-	log.Println("开发服务: ", fmt.Sprintf("http://127.0.0.1:%d/static", port))
+	log.Println("[开发服务]: ", fmt.Sprintf("http://127.0.0.1:%d/static", port))
+	log.Println("[开发服务]: ", fmt.Sprintf("http://127.0.0.1:%d/chat", port))
 	r.Run(fmt.Sprintf(":%d", port))
 }
