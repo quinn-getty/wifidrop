@@ -33,6 +33,8 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+var clients = make(map[*websocket.Conn]bool)
+
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
 	hub *Hub
