@@ -2,13 +2,14 @@ const url = `ws://${window.location.hostname}:${location.port}/ws`;
 const wsClient = new WebSocket(url);
 
 class WsClient {
-  constructor(client) {
+  client: WebSocket
+  constructor(client:WebSocket) {
     this.client = client
   }
-  send(data) {
+  send(data:Record<string,string>) {
     this.client.send(JSON.stringify(data))
   }
-  onMessage(fn) {
+  onMessage(fn: (data:Record<string,string>)=>void) {
     this.client.onmessage = ({ data }) => {
       fn(JSON.parse(data))
     }
@@ -16,7 +17,7 @@ class WsClient {
 }
 
 
-const promise = new Promise((resolve, reject) => {
+const promise = new Promise<WsClient>((resolve, reject) => {
   wsClient.onopen = () => {
     resolve(new WsClient(wsClient))
   }

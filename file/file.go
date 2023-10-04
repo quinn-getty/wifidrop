@@ -89,29 +89,6 @@ func GetHistory() ([]HistoryTiem, error) {
 		log.Println("解析JSON数据时出错:", err)
 	}
 	return list, nil
-
-	// file, err := getHistoryFile()
-	// if err != nil {
-	// 	log.Print("打开或创建文件失败:", err)
-	// 	return list, nil
-	// }
-	// defer file.Close()
-
-	// data := make([]byte, 0)
-	// _, err = file.Read(data)
-	// if err != nil {
-	// 	log.Print("读取文件时出错:", err)
-	// 	return list, err
-	// }
-
-	// log.Print("获取到的数据:", data)
-	// // 解析JSON数据
-	// err = json.Unmarshal(data, &list)
-	// if err != nil {
-	// 	log.Println("解析JSON数据时出错:", err)
-	// }
-
-	// return list, nil
 }
 
 func WhiteHistory(item HistoryTiem) error {

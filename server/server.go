@@ -34,14 +34,11 @@ func initApiV1(r *gin.RouterGroup, hub *ws.Hub) {
 	r.GET("/qrcodes", controller_v1.QrcodeController)
 	r.POST("/texts", controller_v1.TextController)
 	r.GET("/addresses", controller_v1.AddressesController)
-	r.GET("/ws", func(ctx *gin.Context) {
-		ws.HttpController(ctx, hub)
-	})
 }
 func initApiV2(r *gin.RouterGroup, hub *ws.Hub) {
 	r.POST("/send", controller_v2.Send)
 	r.POST("/upload", controller_v2.Uploads)
-	r.POST("/download", controller_v2.DownLoads)
+	r.GET("/download/:path", controller_v2.DownLoads)
 	r.GET("/history", controller_v2.History)
 }
 
@@ -57,6 +54,9 @@ func Run(port int) {
 
 	initApiV1(r.Group("/api/v1"), hub)
 	initApiV2(r.Group("/api/v2"), hub)
+	r.GET("/ws", func(ctx *gin.Context) {
+		ws.HttpController(ctx, hub)
+	})
 
 	r.StaticFS("/static", http.FS(staticFiles))
 	r.StaticFS("/chat", http.FS(chatStaticFiles))

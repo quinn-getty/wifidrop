@@ -1,6 +1,7 @@
 package controller_v2
 
 import (
+	"log"
 	"net/http"
 	"path/filepath"
 
@@ -13,6 +14,7 @@ func DownLoads(c *gin.Context) {
 
 	if path := c.Param("path"); path != "" {
 		target := filepath.Join(uploadsPath, path)
+		log.Println(target)
 		c.Header("Content-Description", "File Transfer")
 		c.Header("Content-Transfer-Encoding", "binary")
 		c.Header("Content-Disposition", "attachment; filename="+path)

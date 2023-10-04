@@ -11,21 +11,18 @@ import {
   FaFileZipper,
   FaFile,
 } from "react-icons/fa6";
-import { useRef } from "react";
-import { http } from "./utils/http";
+import {
+  BiSolidFileCss,
+  BiSolidFileHtml,
+  BiSolidFileJs,
+  BiSolidFileJson,
+  BiSolidFileTxt,
+} from "react-icons/bi";
 
-const icons = {
-  pdf: <FaFilePdf />,
-  csv: <FaFileCsv />,
-  excel: <FaFileExcel />,
-  img: <FaFileImage />,
-  ppt: <FaFilePowerpoint />,
-  video: <FaFileVideo />,
-  word: <FaFileWord />,
-  zip: <FaFileZipper />,
-  file: <FaFile />,
-};
-icons;
+import { useEffect, useRef, useState } from "react";
+import { http } from "./utils/http";
+import dayjs from "dayjs";
+import { getWsClient } from "./utils/ws_client";
 
 function getRandomColor1() {
   // 生成随机红色通道值
@@ -65,6 +62,9 @@ function App() {
     if (!file) return;
     const formData = new FormData();
     formData.append("raw", file);
+    console.log(file.type);
+
+    formData.append("type", file.type || "file");
     http({
       method: "post",
       url: "/api/v2/upload",
@@ -74,46 +74,46 @@ function App() {
       },
     });
   };
+
+  const getHistory = async () => {
+    const res = await http.get("/api/v2/history");
+    setList(res.data.list || []);
+  };
+
+  const [list, setList] = useState<
+    {
+      type: string;
+      content: string;
+      time: number;
+      ip: string;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    getHistory();
+  }, []);
+
+  useEffect(() => {
+    getWsClient().then((c) => {
+      c.onMessage((data) => {
+        console.log(data);
+      });
+    });
+  }, []);
+
   return (
     <main className="md:p-2 xl:p-5 w-screen h-screen">
       <Card className="mx-auto h-full  max-w-[768px]  sm:rounded-xl rounded-none  sm:p-2 md:p-5">
         <h1 className=" text-center">AirDrop-Go</h1>
         <div className="h-full flex flex-col">
           <div className="h-full overflow-auto w-auto pb-4">
-            {[
-              1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2,
-              3, 4, 5, 6, 7, 8, 9, 0,
-            ].map((_, index) => (
-              <div key={index} className="w-full flex flex-wrap">
-                <div className="max-w-[90%]">
-                  <div className="text-sm">
-                    <span className="text-[#333333] font-[600]">
-                      192.17.1.1
-                    </span>
-                    <span className="text-xs pl-2 text-[#d1d1d1]">
-                      2020.2.2
-                    </span>
-                  </div>
-                  <Card className="shadow-sm my-1 bg-[#dfdfdf] px-2 py-2.5">
-                    <div className="flex">
-                      <div
-                        className={`text-[40px]`}
-                        style={{
-                          color: getRandomColor1(),
-                        }}
-                      >
-                        <FaFilePdf />
-                      </div>
-                      <div className="pl-2">
-                        <h1>这是一个pdf</h1>
-                      </div>
-                    </div>
-                  </Card>
-                </div>
+            {list.map((item, index) => (
+              <div key={index} className="w-full mb-4 flex flex-wrap">
+                <ItemCard item={item} />
               </div>
             ))}
           </div>
-          <div className="flex">
+          <div className="flex pb-2">
             <Textarea
               ref={inputRef}
               minRows={1}
@@ -148,5 +148,114 @@ function App() {
     </main>
   );
 }
+
+const icons = {
+  pdf: <FaFilePdf />,
+  csv: <FaFileCsv />,
+  excel: <FaFileExcel />,
+  img: <FaFileImage />,
+  ppt: <FaFilePowerpoint />,
+  video: <FaFileVideo />,
+  word: <FaFileWord />,
+  zip: <FaFileZipper />,
+  file: <FaFile />,
+};
+
+icons;
+
+const getIcon = (type: string) => {
+  if (type === "application/pdf") {
+    return <FaFilePdf />;
+  }
+  if (type === "application/zip") {
+    return <FaFileZipper />;
+  }
+  if (type === "application/vnd.ms-powerpoint") {
+    return <FaFilePowerpoint />;
+  }
+  if (type === "text/csv") {
+    return <FaFileCsv />;
+  }
+  if (type === "text/html") {
+    return <BiSolidFileHtml />;
+  }
+  if (type === "text/javascript") {
+    return <BiSolidFileJs />;
+  }
+  if (type === "application/json") {
+    return <BiSolidFileJson />;
+  }
+  if (type === "text/css") {
+    return <BiSolidFileCss />;
+  }
+  if (type === "text/plain") {
+    return <BiSolidFileTxt />;
+  }
+  if (/^video\//.test(type)) {
+    return <FaFileVideo />;
+  }
+  if (/excel$/.test(type)) {
+    return <FaFileExcel />;
+  }
+  if (/word/.test(type)) {
+    return <FaFileWord />;
+  }
+
+  return <FaFile />;
+};
+
+const ItemCard = ({
+  item,
+}: {
+  item: {
+    type: string;
+    content: string;
+    time: number;
+    ip: string;
+  };
+}) => {
+  return (
+    <div className="max-w-[90%]">
+      <div className="text-sm">
+        <span className="text-[#333333] font-[600]">{item.ip}</span>
+        <span className="text-xs pl-2 text-[#d1d1d1]">
+          {dayjs(item.time).format("YYYY-MM-DD HH:mm:ss")}
+        </span>
+      </div>
+      <Card className="shadow-sm my-1 bg-[#dfdfdf] px-4 py-4">
+        {item.type !== "string" ? (
+          <>
+            <div className="flex">
+              {/^image\//.test(item.type) ? (
+                <img
+                  className="max-w-[80%] max-h-[250px] w-auto"
+                  src={`/api/v2/download/${item.content}`}
+                />
+              ) : (
+                <>
+                  <div
+                    className={`text-[80px]`}
+                    style={{
+                      color: getRandomColor1(),
+                    }}
+                  >
+                    {getIcon(item.type)}
+                  </div>
+                  <div className="pl-2">
+                    <a href={`/api/v2/download/${item.content}`}>
+                      <h1>{item.content.replace(/^([^_]*)_/, "")}</h1>
+                    </a>
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        ) : (
+          <>{item.content}</>
+        )}
+      </Card>
+    </div>
+  );
+};
 
 export default App;
